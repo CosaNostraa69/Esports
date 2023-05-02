@@ -1,0 +1,61 @@
+<?php
+
+$currentDir = __DIR__;
+$root = dirname($currentDir, 2);
+require($root . '/php/DBManager.php');
+require($root . '/php/team/Team.php');
+
+
+
+class ManagerTeam extends DBManager
+
+
+{
+  
+    public function getAllTeam()
+    {
+        $res = $this->getConnexion()->query('SELECT * FROM team');
+
+        $teams = [];
+
+        foreach ($res as $team) {
+            $newTeam = new Team;
+            $newTeam->setName($team['name']);
+            $newTeam->setDescription($team['description']);
+            $newTeam->setId($team['id']);
+
+            $teams[] = $newTeam;
+        }
+
+        return $teams;
+    }
+
+    public function create($team)
+    {
+
+        $request = 'INSERT INTO team(name, description) VALUE (?, ?)';
+        $query = $this->getConnexion()->prepare($request);
+        $query->execute([
+            $team->getName(), $team->getDescription()
+        ]);
+        header('Refresh:0');
+        return true;
+    }
+ 
+    public function update($team)
+    {
+        $request = 'UPDATE team SET name = ?, description = ? WHERE id = ?;';
+        $query = $this->getConnexion()->prepare($request);
+        $query->execute([$team->getName(), $team->getDescription(), $team->getId()]);
+    }
+
+    public function delete($teamId)
+    {
+        $request = 'DELETE FROM team WHERE id = ?;';
+        $query = $this->getConnexion()->prepare($request);
+        $query->execute([$teamId]);
+    }
+
+
+}
+?>
